@@ -3,11 +3,6 @@
   hosts: all
   become: true
 
-  vars:
-    users:
-      - bruno
-      - icaro
-
   tasks:
     - name: Update system packages
       ansible.builtin.apt:
@@ -68,3 +63,17 @@
         name: vagrant
         groups: docker
         append: yes
+
+    - name: Copy docker-compose.yml file to VM
+      ansible.builtin.copy:
+        src: docker-compose.yml
+        dest: /vagrant
+        mode: "0644"
+
+    - name: Execute docker-compose
+      community.docker.docker_compose_v2:
+        project_src: /opt/myapp
+        files:
+          - docker-compose.yml
+        state: present
+        pull: true
