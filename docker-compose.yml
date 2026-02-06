@@ -1,0 +1,30 @@
+services:
+  app:
+    image: nginx:alpine
+    container_name: web-server
+    ports:
+      - "80:80"
+    volumes:
+      - ./html:/usr/share/nginx/html
+    networks:
+      - app-network
+
+  database:
+    image: postgres:13-alpine
+    container_name: db
+    environment:
+      POSTGRES_PASSWORD: senha123
+      POSTGRES_DB: meubanco
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+    
