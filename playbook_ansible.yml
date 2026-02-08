@@ -4,53 +4,31 @@
   become: true
 
   tasks:
-    - name: Update system packages
-      ansible.builtin.apt:
-        update_cache: yes
-        upgrade: full
-        autoremove: yes
-
-    - name: Ensure dependencies are installed
-      ansible.builtin.apt:
-        name:
-          - bc
-          - curl
-          - expect
-          - git
-          - ca-certificates
-        state: present
-
-    - name: Create Docker GPG key directory
-      ansible.builtin.file:
-        path: /etc/apt/keyrings
+    - name: Ensure /opt/myapp is created
+      file:
+        path: /opt/myapp
         state: directory
-        mode: "0755"
+        owner: vagrant
+        group: vagrant
+        mode: '0750'
 
-    - name: Download Docker's official GPG key
-      ansible.builtin.get_url:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        dest: /etc/apt/keyrings/docker.asc
-        mode: "0644"
+    - name: Install and configure Docker
+      block:
+        - name: Download Docker install script
+          get_url:
+            url: https://get.docker.com
+            dest: /tmp/get-docker.sh
+            mode: '0755'
 
-    - name: Add Docker repository to Apt sources
-      ansible.builtin.apt_repository:
-        repo: "deb [arch={{ ansible_architecture }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
-        state: present
-        filename: docker
+        - name: Execute Docker install script
+          command: /tmp/get-docker.sh
+          args:
+            creates: /usr/bin/docker
 
-    - name: Update apt cache after adding Docker repository
-      ansible.builtin.apt:
-        update_cache: yes
-
-    - name: Install Docker and Docker Compose
-      ansible.builtin.apt:
-        name:
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
-          - docker-buildx-plugin
-          - docker-compose-plugin
-        state: present
+        - name: Clean up
+          file:
+            path: /tmp/get-docker.sh
+            state: absent
 
     - name: Ensure Docker service is enabled and started
       ansible.builtin.service:
@@ -67,13 +45,10 @@
     - name: Copy docker-compose.yml file to VM
       ansible.builtin.copy:
         src: docker-compose.yml
-        dest: /vagrant
+        dest: /opt/myapp/
         mode: "0644"
 
-    - name: Execute docker-compose
-      community.docker.docker_compose_v2:
-        project_src: /opt/myapp
-        files:
-          - docker-compose.yml
-        state: present
-        pull: true
+    - name: Start Docker Compose Services
+      command: docker compose -f /opt/myapp/docker-compose.yml up -d
+      args:
+        chdir: /opt/myapp/
