@@ -39,6 +39,8 @@ vagrant up
 
 2. Após o provisionamento, abra um navegador e acesse a aplicação em:
 
+```
 http://192.168.56.180:8080
+```
 
 Observação: a máquina Vagrant está configurada para usar o endereço IP `192.168.56.180` na porta `8080`. Caso modifique o `Vagrantfile` ou a rede, ajuste a URL conforme necessário.
