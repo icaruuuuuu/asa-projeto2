@@ -1,0 +1,41 @@
+volumes:
+  app:
+  my:
+
+networks:
+  wordpress:
+    driver: bridge
+
+services:
+  webserver:
+    image: wordpress
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: database
+      WORDPRESS_DB_USER: ifpb
+      WORDPRESS_DB_PASSWORD: ifpb
+      WORDPRESS_DB_NAME: asa
+    volumes:
+      - app:/var/www/html
+    networks:
+      - wordpress
+
+  database:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: asa
+      MYSQL_USER: ifpb
+      MYSQL_PASSWORD: ifpb
+      MYSQL_RANDOM_ROOT_PASSWORD: "1"
+    volumes:
+      - my:/var/lib/mysql
+    networks:
+      - wordpress
+
+  webproxy:
+    image: brunodfrs/nginx-asa2
+    ports:
+      - 8080:8080
+    networks:
+      - wordpress

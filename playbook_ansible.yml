@@ -10,7 +10,7 @@
         state: directory
         owner: vagrant
         group: vagrant
-        mode: '0750'
+        mode: "0750"
 
     - name: Install and configure Docker
       block:
@@ -18,7 +18,7 @@
           get_url:
             url: https://get.docker.com
             dest: /tmp/get-docker.sh
-            mode: '0755'
+            mode: "0755"
 
         - name: Execute Docker install script
           command: /tmp/get-docker.sh
@@ -44,7 +44,7 @@
 
     - name: Copy docker-compose.yml file to VM
       ansible.builtin.copy:
-        src: docker-compose.yml
+        src: ./docker-compose.yml
         dest: /opt/myapp/
         mode: "0644"
 
